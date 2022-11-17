@@ -352,15 +352,16 @@ import tw from "tailwind-react-native-classnames";
 
 Now use it:
 
-````javascript
-<SafeAreaView style={styles.AndroidSafeArea}>
-<Text style={tw`text-red-500 p-10`}>HomeScreen test once again test</Text>
-</SafeAreaView>
 ```javascript
+<SafeAreaView style={styles.AndroidSafeArea}>
+  <Text style={tw`text-red-500 p-10`}>HomeScreen test once again test</Text>
+</SafeAreaView>
+```
 
 3. PROG NOTE IMP: note that here we are still using the style prop instead of directly stating className. Also you have to use the tw object that you imported and concatenate that with the tailwindcss class names. For the concatenation, we are using the backtick symbol (not SINGLE QUOTES OR DOUBLE QUOTES) (the key below the ESC key for a regular desktop QWERTY keyboard)
 
 4. if you want to merge this tw classname notation with StyleSheet (Assuming you have declared an text styling in StyleSheets) you will have to pass in an array such as:
+
 ```javascript
 <Text style={[tw`text-red-500 p-10`, styles.text]}>
 ```
@@ -890,4 +891,7 @@ CODE:
 ```
 
 ```
-````
+
+```
+
+```
