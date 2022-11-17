@@ -338,477 +338,554 @@ const styles = StyleSheet.create({
 tailwindcss classname packages can be found on this [Link](https://github.com/jaredh159/tailwind-react-native-classnames)
 
 1. add this package to our environment
-   terminal cmd:
 
 ```
 yarn add tailwind-react-native-classnames
 ```
 
---> import this package into you App
-in HomeScreen.js
+2. import this package into your App in HomeScreen.js
 
+```javascript
 //import
 import tw from "tailwind-react-native-classnames";
+```
 
---> Now use it :
+Now use it:
+
+````javascript
 <SafeAreaView style={styles.AndroidSafeArea}>
 <Text style={tw`text-red-500 p-10`}>HomeScreen test once again test</Text>
 </SafeAreaView>
+```javascript
 
-PROG NOTE IMP: note that here we are still using the style prop instead of directly stating className. Also you have to use the tw object that you imported and concatenate that with the tailwindcss class names. For the concatenation, we are using the backtick symbol (not SINGLE QUOTES OR DOUBLE QUOTES) (the key below the ESC key for a regular desktop QWERTY keyboard)
+3. PROG NOTE IMP: note that here we are still using the style prop instead of directly stating className. Also you have to use the tw object that you imported and concatenate that with the tailwindcss class names. For the concatenation, we are using the backtick symbol (not SINGLE QUOTES OR DOUBLE QUOTES) (the key below the ESC key for a regular desktop QWERTY keyboard)
 
---> if you want to merge this tw classname notation with StyleSheet you will have to pass in an array such as
+4. if you want to merge this tw classname notation with StyleSheet (Assuming you have declared an text styling in StyleSheets) you will have to pass in an array such as:
+```javascript
 <Text style={[tw`text-red-500 p-10`, styles.text]}>
+````
 
-Assuming you have declared an text styling in StyleSheets.
+5. UPDATE CODE TO INCLUDE some tailwind styling
+   CODE:
 
---> UPDATE CODE TO INCLUDE tailwind styling
-CODE:
+```javascript
 const HomeScreen = () => {
-return (
-<SafeAreaView style={tw`bg-white h-full pt-10`}>
-<Text>HomeScreen test once again test 123</Text>
-</SafeAreaView>
-);
+  return (
+    <SafeAreaView style={tw`bg-white h-full pt-10`}>
+      <Text>HomeScreen test once again test 123</Text>
+    </SafeAreaView>
+  );
 };
+```
 
----
+### STEP 7: Start editing the UI content of HomeSreen.js
 
-STEP 7: Start editing the UI content of HomeSreen.js
-
-1. import logo and images
-   --> remove all previous content inside component <SafeAreaView>
+1. import logo and images (remove all previous content inside component SafeAreaView>
 
 CODE:
-<View style={tw`p-1`}>
-<Image
-source={require("../assets/Uber-Logo.png")}
-style={styles.uberLogo}
-/>
-</View>
 
---> I have store my images inside ./assets folder
+```javascript
+<View style={tw`p-1`}>
+  <Image source={require("../assets/Uber-Logo.png")} style={styles.uberLogo} />
+</View>
+```
+
+I have saved my images inside ./assets folder
 
 CODE FOR STYLES:
+
+```javascript
 uberLogo: {
 width: 100,
 height: 100,
 resizeMode: "contain",
 },
+```
 
----
+### Step 8: Setting up React Navigation
 
-Step 8: Setting up React Navigation
+1. Setup navigation options for the APp such as book a ride and say use uber eats etc.
 
-2. Setup navigation options for the APp such as book a ride and say use uber eats etc.
+2. Create a new folder insider the root directory called "components". this will contain our reusable components.
 
---> create a new folder insider the root directory called "components"; this will contain our reusable components
+3. inside ./components create a file called "NavOptions.js". We will use this to show reusable card components on the UI (recall our Airbnb exercise). Create boiler template using rnfe snippet
 
---> inside ./components create a file called "NavOptions.js". We will use this to show reusable card components on the UI (recall our Airbnb exercise). Create boiler template using rnfe snippet
 CODE:
+
+```javascript
 import { View, Text } from "react-native";
 import React from "react";
 
 const NavOptions = () => {
-return (
-<View>
-<Text>NavOptions</Text>
-</View>
-);
+  return (
+    <View>
+      <Text>NavOptions</Text>
+    </View>
+  );
 };
 
 export default NavOptions;
+```
 
---> Go back to HomeScreen.js, and under <Image ... /> component, add the <NavOptions />
+4. Go back to HomeScreen.js, and under Image component, add the NavOptions component
 
+CODE:
+
+```javascript
 //import
 import NavOptions from "../components/NavOptions";
 
-UPDATED CODE:
+//UPDATED CODE:
 <View style={tw`p-1`}>
-<Image
-source={require("../assets/Uber-Logo.png")}
-style={styles.uberLogo}
-/>
+  <Image source={require("../assets/Uber-Logo.png")} style={styles.uberLogo} />
 
-        <NavOptions />
-      </View>
+  <NavOptions />
+</View>;
+```
 
---> Add the following data array to your NavOptions.js file right below the import statements
+5. Add the following data array to your NavOptions.js file right below all the import statements
+
 CODE:
+
+```javascript
 const data = [
-{
-id: "123",
-title: "Get a ride",
-image: require("../assets/UberX.webp"),
-screen: "MapScreen",
-},
-{
-id: "456",
-title: "Order Food",
-image: require("../assets/Uber-Eats-Logo.png"),
-screen: "EatsScreen", // Finish as self exercise
-},
+  {
+    id: "123",
+    title: "Get a ride",
+    image: require("../assets/UberX.webp"),
+    screen: "MapScreen",
+  },
+  {
+    id: "456",
+    title: "Order Food",
+    image: require("../assets/Uber-Eats-Logo.png"),
+    screen: "EatsScreen", // Finish as self exercise
+  },
 ];
+```
 
---> We will use this as props to render out our navigation options on the UI. the screen essentially states that once that nav option is clicked, which screen UI will render and we will implement this in a short while using react navigation.
+6. We will use this as props to render out our navigation options on the UI. the screen essentially states that once that nav option is clicked, which screen the UI will render and we will implement this in a short while using react navigation.
 
---> the <FlatList> component of React native (https://reactnative.dev/docs/flatlist)
+7. We will render the array items using the FlatList core component of React native (https://reactnative.dev/docs/flatlist)
 
-REmove the following code in NavOptions.js
+Remove the following code in NavOptions.js.
 REMOVE CODE:
+
+```javascript
 <View>
-<Text> I am the NavOptions</Text>
+  <Text> I am the NavOptions</Text>
 </View>
+```
 
 ADD CODE:
+
+```javascript
 <FlatList
-data={navData}
-horizontal
-keyExtractor={(item) => item.id}
-renderItem={({ item }) => (
-<TouchableOpacity>
-<Text>{item.title}</Text>
-</TouchableOpacity>
-)}
+  data={navData}
+  horizontal
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <TouchableOpacity>
+      <Text>{item.title}</Text>
+    </TouchableOpacity>
+  )}
 />
+```
 
--> data prop is the source of the data which is the array that we created. horizontal is bool value that determines whether the list items will be rendered horizontally (if you don't include horizontal, default list view is vertical). keyExtractors sets the unique key for each item in the data such that react can distinguish between them and if any changes take place then react knows which item to re-render instead of re-rendering the whole UI. renderItem method takes the data and renders each item on the UI. The <TouchableOpacity> core components give the touch screen feedback look on the items rendered in UI.
+#### Code explanation:
 
---> Add images and icon along with the text to navigation options instead of simply rendering a Text
+- data prop is the source of the data which is the array that we created.
+- horizontal is bool value that determines whether the list items will be rendered horizontally (if you don't include horizontal, default list view is vertical).
+- keyExtractors sets the unique key for each item in the data such that react can distinguish between them and if any changes take place then react knows which item to re-render instead of re-rendering the whole UI.
+- renderItem method takes the data and renders each item on the UI.
+- The TouchableOpacity core components give the touch screen feedback look on the items rendered in UI.
+
+9. Add images and icon along with the text to navigation options instead of simply rendering a Text
+
 REMOVE CODE:
+
+```javascript
 <Text>{item.title}</Text>
+```
 
 ADD CODE:
-<View>
-<Image
-style={{ width: 150, height: 150, resizeMode: "contain" }}
-source={item.image}
-/>
-<Text>{item.title}</Text>
-</View>
 
---> ADD some more overall styling (only add the style):
+```javascript
+<View>
+  <Image
+    style={{ width: 150, height: 150, resizeMode: "contain" }}
+    source={item.image}
+  />
+  <Text>{item.title}</Text>
+</View>
+```
+
+ADD some more overall styling (only add the style):
+
 CODE:
+
+```javascript
 <TouchableOpacity style={tw`pl-2 pb-8 pt-4 bg-gray-200 m-2 w-40`}>
-<View>
-<Image
-style={{ width: 150, height: 150, resizeMode: "contain" }}
-source={item.image}
-/>
-<Text style={tw`mt-2 text-lg font-semibold`}>{item.title}</Text>
-</View>
+  <View>
+    <Image
+      style={{ width: 150, height: 150, resizeMode: "contain" }}
+      source={item.image}
+    />
+    <Text style={tw`mt-2 text-lg font-semibold`}>{item.title}</Text>
+  </View>
 </TouchableOpacity>
+```
 
----
+### Step 9: React native Elements
 
---> ADD AN ICON to navigation using REACT NATIVE ELEMENTS (3rd party [material UI] theme provider for various react native components)
+1. ADD AN ICON to navigation using REACT NATIVE ELEMENTS (3rd party [material UI] theme provider for various react native components)
+2. Goto: https://reactnativeelements.com/ and click get started
 
-1. Goto: https://reactnativeelements.com/ and click get started
+3. Add the packages:
 
-2. terminal cmd:
+```
    yarn add react-native-elements
    yarn add react-native-vector-icons
    yarn add react-native-safe-area-context
+```
 
 the last one will prevent the icons from bleeding into dangerous area. we need import this obj into App.js and wrap our entire app.
 
-3. Goto App.js and wrap your entire App as follows:
-
-//import
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+4. Goto App.js and wrap your entire App as follows:
 
 CODE:
+
+```javascript
+//import
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+// CODE:
 <Provider store={store}>
-<SafeAreaProvider>
-<HomeScreen />
-</SafeAreaProvider>
-</Provider>
+  <SafeAreaProvider>
+    <HomeScreen />
+  </SafeAreaProvider>
+</Provider>;
+```
 
-4. Go back to NavOptions.js to add your icon:
-   https://reactnativeelements.com/docs/components/icon#available-icon-sets
+5. Go back to NavOptions.js to add your icon. See this site for [documentation](https://reactnativeelements.com/docs/components/icon#available-icon-sets)
 
-CODe:
+CODE:
+
+```javascript
 //import
 import { Icon } from "react-native-elements";
 
 //code: (right below <Text> that is inside <View> of parent component <TouchableOpacity>)
-<Icon name="arrowright" color="white" type="antdesign" />
+<Icon name="arrowright" color="white" type="antdesign" />;
+```
 
-5. Style your Icon
-   CODE:
-   <Icon
-   style={tw`p-2 bg-black rounded-full w-10 mt-4`}
-   name="arrowright"
-   color="white"
-   type="antdesign"
-   />
+6. Style your Icon
 
----
-
---> Click on icon to goto next screen.
-Notice in the data array in NavOptions.js, we have an key called screen for each data item in the array. Our goal now is to goto this screen when user touches the nav options
-
---> In ./screens create a new screen called MapScreen.js
---> create boiler template using rnfe
 CODE:
+
+```javascript
+<Icon
+  style={tw`p-2 bg-black rounded-full w-10 mt-4`}
+  name="arrowright"
+  color="white"
+  type="antdesign"
+/>
+```
+
+7. Click on icon to goto next screen. Notice in the data array in NavOptions.js, we have an key called screen for each data item in the array. Our goal now is to goto this screen when user touches/clicks the nav options
+
+8. In ./screens create a new screen called MapScreen.js
+
+9. create boiler template using rnfe
+   CODE:
+
+```javascript
 import { View, Text } from "react-native";
 import React from "react";
 
 const MapScreen = () => {
-return (
-<View>
-<Text>MapScreen</Text>
-</View>
-);
+  return (
+    <View>
+      <Text>MapScreen</Text>
+    </View>
+  );
 };
 
 export default MapScreen;
+```
 
---> Open the following:
-https://reactnative.dev/docs/navigation
+10. Open the following for reference: https://reactnative.dev/docs/navigation
 
---> Packge to be used: https://reactnavigation.org/
+11. Package to be used: https://reactnavigation.org/
 
---> Add this to your environment
-terminal cmd: yarn add @react-navigation/native
-terminal cmd:
+12. Add this package to your environment
+
+```
+yarn add @react-navigation/native
+```
+
+13. Then add these Expo packages
+
+```
 npx expo install react-native-screens react-native-safe-area-context
+```
 
---> Wrap your App in the NavigationContainer for React navigation to be incorporated into your App
+14. Wrap your App in the NavigationContainer component for React navigation to be incorporated into your App
 
+CODE:
+
+```javascript
 //import
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from "@react-navigation/native";
 
-CODE UPDATE:
+// CODE UPDATE:
 <Provider store={store}>
-<NavigationContainer>
-<SafeAreaProvider>
-<HomeScreen />
-</SafeAreaProvider>
-</NavigationContainer>
-</Provider>
+  <NavigationContainer>
+    <SafeAreaProvider>
+      <HomeScreen />
+    </SafeAreaProvider>
+  </NavigationContainer>
+</Provider>;
+```
 
---> Implementing the react navigation
-goto: https://reactnavigation.org/docs/hello-react-navigation
+15. Implementing the react navigation (reference: https://reactnavigation.org/docs/hello-react-navigation)
 
-terminal cmd: yarn add @react-navigation/native-stack
+Add the package
+
+```
+yarn add @react-navigation/native-stack
+```
 
 note: if you hit an error, stop your server first.
 
---> Stack is what will enable the mobile app navigation. All screens of a mobile app are presented as if they are stored in a Stack data structure. When you goto a new screen it gets stacked (pushed/layered) on top of the current screen and when you navigate back to a previous screen, the current screen gets popped.
+15. Stack is what will enable the mobile app navigation. All screens of a mobile app are presented as if they are stored in a Stack data structure. When you goto a new screen it gets stacked (pushed/layered) on top of the current screen and when you navigate back to a previous screen, the current screen gets popped.
 
+CODE:
+
+```javascript
 //import in App.js:
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+```
 
---> Next inside export default function App(){} body before the return() statement add the following
+16. Next inside export default function App(){} body before the return() statement add the following
+
 CODE:
+
+```javascript
 const Stack = createNativeStackNavigator();
+```
 
---> Now inside the <SafeAreaProvider> component add the following components that will wrap all your App screens:
+17. Now inside the SafeAreaProvider component add the following components that will wrap all your App screens:
 
 CODE:
-<Stack.Navigator>
-<Stack.Screen
-name="HomeScreen"
-component={HomeScreen}
-options={{ headerShown: false }}
-/>
-</Stack.Navigator>
-{/_ <HomeScreen /> _/}
 
---> Now lets add another screen called the MapScreen right after the above code
+```javascript
+<Stack.Navigator>
+  <Stack.Screen
+    name="HomeScreen"
+    component={HomeScreen}
+    options={{ headerShown: false }}
+  />
+</Stack.Navigator>
+```
+
+18. Now lets add another screen called the MapScreen right after the above code
+
 CODE:
+
+```javascript
 <Stack.Navigator>
-<Stack.Screen
-name="HomeScreen"
-component={HomeScreen}
-options={{ headerShown: false }}
-/>
-<Stack.Screen
-name="MapScreen"
-component={MapScreen}
-options={{ headerShown: false }}
-/>
+  <Stack.Screen
+    name="HomeScreen"
+    component={HomeScreen}
+    options={{ headerShown: false }}
+  />
+  <Stack.Screen
+    name="MapScreen"
+    component={MapScreen}
+    options={{ headerShown: false }}
+  />
 </Stack.Navigator>
+```
 
---> don't forget to import MapScreen component into App.js
+Don't forget to import MapScreen component into App.js
 
---> Now when users click or touch on get a ride we want to navigate to the MapScreen. We will implement this using a Hook called useNavigation() [https://reactnavigation.org/docs/use-navigation/]
+19. Now when users click or touch on get a ride we want to navigate to the MapScreen. We will implement this using a Hook called [useNavigation()](https://reactnavigation.org/docs/use-navigation/)
 
---> We will implement this in NavOptions.js file where the <touchableOpacity> component gets rendered.
+20. We will implement this in NavOptions.js file where the touchableOpacity component gets rendered.
 
---> import the following
+21. import the following
+
+```javascript
 //import
 import { useNavigation } from "@react-navigation/native";
+```
 
---> declare your hook inside the functional component of NavOptions
+22. declare your hook inside the functional component of NavOptions
 
 CODE:
-const navigation = useNavigation();
 
---> add event listener to <TouchableOpacity> and connect it to navigation hook object previously declared.
+```javascript
+const navigation = useNavigation();
+```
+
+23. add event listener to TouchableOpacity and connect it to navigation hook object previously declared.
 
 CODE: [just add the event listener part]
+
+```javascript
 <TouchableOpacity
 onPress={() => navigation.navigate(item.screen)}
 style={tw`pl-2 pb-8 pt-4 bg-gray-200 m-2 w-40`} >
+```
 
---> take a moment to appreciate the little big thing that has been achieved.
+Take a moment to appreciate the little big thing that has been achieved.
 
-CHECKPOINT:
+### CHECKPOINT:
 
 1. What is react navigation how do you implment it in your App
 2. What are react native elements how to do you implement it in your app.
 
----
+### STEP 10: Google APIs
 
-STEP 8: Google APIs
-
-1. Goto link:
-   https://github.com/FaridSafi/react-native-google-places-autocomplete
+1. Goto link: https://github.com/FaridSafi/react-native-google-places-autocomplete
 
 2. Add the package to your environment
-   terminal cmd:
+
+```
    yarn add react-native-google-places-autocomplete
+```
 
 3. Get Google API keys for these google APIs
 
---> NOTE: you need to enable billing on Google Cloud Platform for this. Note that there is a free quota of usage. If you query your APIs (google places, google maps, google distance matrix) over the free quota you will charged to your credit card. For testing and development purposes, you generally will not exceed the free quota.
+   1. NOTE: you need to enable billing on Google Cloud Platform for this. Note that there is a free quota of usage. If you query your APIs (google places, google maps, google distance matrix) over the free quota you will charged to your credit card. For testing and development purposes, you generally will not exceed the free quota.
+   2. Goto link: https://cloud.google.com/
+   3. sign in with your preferred gmail account. Use your personal gmail account and not your oakland.edu account.
+   4. From top right corner, click on the button called "Console"
+   5. IF you are using this for the first time, you need to find and click on new project
+   6. If you have used this before, you will probably see some old project. From top left corner, see where it says Google Cloud, to the right of it, you will see the project name. Click on that.
+   7. It will open a select a project window
+   8. click on "New Project" button to the top right corner of this new window.
+   9. follow the prompts and finish the project setup.
+   10. once project is created make sure to select this project (if you have other projects).
+   11. click on the hamburger menu icon on top left
+   12. Click on API and Services (or click it from the quick access menu)
+   13. Notice right below the search bar in the top center location of the window, there is an option called Enable APIS AND SERVICES. click on that.
+   14. in the search bar of this new page, search for the following APIs: Directions API (click on the result and click on Enable button)
+   15. after you enable this, it will take you back to a page where there will be two sections: enabled APIs and Additional APIs. From Additional API section enable the following APIs: Places API and Distance Matrix API
+   16. Make sure you are in the right project folder.
 
---> Goto link: https://cloud.google.com/
---> sign in with your preferred gmail account. Use your personal gmail account and not your oakland.edu account.
---> From top right corner, click on the button called "Console"
---> IF you are using this for the first time, you need to find and click on new project
---> If you have used this before, you will probably see some old project. From top left corner, see where it says Google Cloud, to the right of it, you will see the project name. Click on that.
---> It will open a select a project window
---> click on "New Project" button to the top right corner of this new window.
---> follow the prompts and finish the project setup.
---> once project is created make sure to select this project (if you have other projects).
---> click on the hamburger menu icon on top left
---> Click on API and Services (or click it from the quick access menu)
---> Notice right below the search bar in the top center location of the window, there is an option called Enable APIS AND SERVICES. click on that.
---> in the search bar of this new page, search for the following APIs:
+#### ENABLE BILLING (otherwise these APIs wont work)
 
-- Directions API (click on the result and click on Enable button)
-
---> after you enable this, it will take you back to a page where there will be two sections: enabled APIs and Additional APIs.
-
---> From Additional API section enable the following APIs
-
-- Places API
-- Distance Matrix API
-
-NOTE: make sure you are in the right project folder.
-
----
-
-ENABLE BILLING (otherwise these APIs wont work)
-
--> click on the hamburger menu icon top left
--> click billing
--> click LINK A BILLING ACCOUNT
--> click CREATE BILLING ACCOUNT
--> fill out prompts, agree to T&C, click CONTINUE
--> change account type to individual
--> Add your credit/debit card infomartion
--> Click on START MY FREE TRIAL
--> finish off the rest of the prompts
+- click on the hamburger menu icon top left
+- click billing
+- click LINK A BILLING ACCOUNT
+- click CREATE BILLING ACCOUNT
+- fill out prompts, agree to T&C, click CONTINUE
+- change account type to individual
+- Add your credit/debit card infomartion
+- Click on START MY FREE TRIAL
+- finish off the rest of the prompts
 
 Free trial will be for 90 days and you will get $300 worth usage (thats A LOT). You won't be charged after free trial ends unless you manually upgrade to a paid account so don't worry.
 
----
+#### API Credentials / API Keys [SENSITIVE; Do Not Share unless you want to]
 
-API Credentials / API Keys [SENSITIVE; Do Not Share unless you want to]
+- go back to API and Services - enabled APIs from the hamburger menu.
+- In this window on the left vertical look for "Credentials"
+- For a fresh start, you will see no Keys
+- See on the screen top center below the search bar the button "CREATE CREDENTIALS". click on it.
+- Select "API Key" from the drop down menu
+- Save your API key somewhere safe. This key will allow you to access all the APIs that you enabled right now.
+- side note: once the key is created from the dashboard you can edit the key and add restrictions to it like this key can be used only from an android app or iOS app etc.
 
--> go back to API and Services - enabled APIs from the hamburger menu.
--> In this window on the left vertical look for "Credentials"
--> For a fresh start, you will see no Keys
--> See on the screen top center below the search bar the button "CREATE CREDENTIALS". click on it.
--> Select "API Key" from the drop down menu
--> Save your API key somewhere safe. This key will allow you to access all the APIs that you enabled right now.
--> side note: once the key is created from the dashboard you can edit the key and add restrictions to it like this key can be used only from an android app or iOS app etc.
+#### Setup your API key in your App
 
----
+- go back to VSCode
+- on the root level, create file called ".env"
+- make sure you put ".env" in the .gitignore file so you don't accidentally push your key to github and expose it.
+- IN THE .env file write the following:
 
-Setup your API key in your App
-
--> go back to VSCode
--> on the root level, create file called ".env"
--> make sure you put ".env" in the .gitignore file so you don't accidentally push your key to github and expose it.
--> IN THE .env file write the following:
+```
 GOOGLE_MAPS_APIKEY=y0UrK3yt4htyOucReated
+```
 
----
+#### Setup your project such that it can use env variables.
 
-Setup your project such that it can use env variables.
+- Add the following package
 
--> Add the following package
-terminal cmd: yarn add react-native-dotenv
+```
+yarn add react-native-dotenv
+```
 
--> Open your file called 'babel.config.js'
-add the following lines of code right after the presets item
+- Open your file called 'babel.config.js'. add the following lines of code right after the presets item
 
 CODE:
+
+```javascript
 plugins: [
-[
-"module:react-native-dotenv",
-{
-moduleName: "@env",
-path: ".env",
-},
+    [
+        "module:react-native-dotenv",
+        {
+            moduleName: "@env",
+            path: ".env",
+        },
+    ],
 ],
-],
+```
 
----
+- From this package: https://github.com/FaridSafi/react-native-google-places-autocomplete, We will add the google-places-autocomplete to our HomeScreen.js file. This will allow users to search for source and destinations.
 
-1. From this package: https://github.com/FaridSafi/react-native-google-places-autocomplete
+- Add the following code to HomeScreen.js
 
-We will add the google-places-autocomplete to our HomeScreen.js file. This will allow users to search for source and destinations.
+CODE:
 
-2. Add the following code to HomeScreen.js
-
+```javascript
 //import
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 // import google api key (this is my env variable name, you will use yours.)
-import { GOOGLE_MAPS_API_KEY } from "@env"
+import { GOOGLE_MAPS_API_KEY } from "@env";
+```
 
--> side note: notice in babel config, we have given an alias module name for the package react-native-dotenv
+- side note: notice in babel config, we have given an alias moduleName for the package react-native-dotenv
 
-// add the component RIGHT BEFORE THE <NavOptions /> component
+- add the component RIGHT BEFORE THE NavOptions component
 
 CODE:
-<GooglePlacesAutocomplete
-placeholder="Start Location"
-styles={{
-            container: {
-              flex: 0,
-            },
-            textInput: {
-              fontSize: 18,
-            },
-          }}
-// including the places search api
-nearbyPlacesAPI="GooglePlacesSearch"
-// google will show suggestion after user has stopped typing and waits 400ms
-debounce={400}
-minLength={2}
-enablePoweredByContainer={false}
-// Query Google to search and give suggestion to user
-query={{
-            key: GOOGLE_MAPS_API_KEY,
-            language: "en",
-          }}
-onPress={(data, details = null) => {
-console.log(data);
-console.log(details);
-}}
-fetchDetails={true}
-returnKeyType={"search"}
-/>
 
-Next Steps: get this data use a dispatch and update the state of origin in the data store's navSlice
+```javascript
+<GooglePlacesAutocomplete
+  placeholder="Start Location"
+  styles={{
+    container: {
+      flex: 0,
+    },
+    textInput: {
+      fontSize: 18,
+    },
+  }}
+  // including the places search api
+  nearbyPlacesAPI="GooglePlacesSearch"
+  // google will show suggestion after user has stopped typing and waits 400ms
+  debounce={400}
+  minLength={2}
+  enablePoweredByContainer={false}
+  // Query Google to search and give suggestion to user
+  query={{
+    key: GOOGLE_MAPS_API_KEY,
+    language: "en",
+  }}
+  onPress={(data, details = null) => {
+    console.log(data);
+    console.log(details);
+  }}
+  fetchDetails={true}
+  returnKeyType={"search"}
+/>
+```
+
+### To be Cont'd: Next Steps: get this data use a dispatch and update the state of origin in the data store's navSlice
 
 ```
 
