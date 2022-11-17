@@ -363,7 +363,7 @@ Now use it:
 4. if you want to merge this tw classname notation with StyleSheet (Assuming you have declared an text styling in StyleSheets) you will have to pass in an array such as:
 ```javascript
 <Text style={[tw`text-red-500 p-10`, styles.text]}>
-````
+```
 
 5. UPDATE CODE TO INCLUDE some tailwind styling
    CODE:
@@ -890,3 +890,4 @@ CODE:
 ```
 
 ```
+````
