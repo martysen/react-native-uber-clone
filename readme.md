@@ -888,10 +888,335 @@ CODE:
 
 ### To be Cont'd: Next Steps: get this data use a dispatch and update the state of origin in the data store's navSlice
 
+### Step 11: Grab user input from google places autocomplete field and save to state of origin.
+
+1. Once user enters the starting place for the ride, we need to grab this input and push it to the state in our data layer that will store the state of the starting location.
+
+2. This will be done by "dispatch to a variable with an action". To declare and use the dispatch we will declare a hook called useDispatch()
+
+3. Within HomeScreen.js, within the declaration of the HomeScreen functional component (right before return statement), declare the following dispatch:
+
+CODE:
+
+```javascript
+// import the following:
+import { useDispatch } from "react-redux";
+
+//Add the following code:
+const dispatch = useDispatch();
 ```
 
+4. So, we now have a dispatcher. But how do we actually access the state and update it with the new value? Remember, in the data store's slice, navSlice, we had created setters to update the value of each state and then we had exported it. We now need to import these setters into our HomeScreen
+
+CODE:
+
+```javascript
+//Also import the following
+import { setOrigin, setDestination } from "../slices/navSlice";
 ```
 
+5. Now we update the body the onPress() event listener for the component GooglePlacesAutocomplete, by removing the test console log code with the following code:
+
+CODE:
+
+```javascript
+ onPress={(data, details = null) => {
+            // console.log(data);
+            // console.log(details);
+            dispatch(
+              setOrigin({
+                location: details.geometry.location,
+                description: data.description,
+              })
+            );
+
+            dispatch(setDestination(null));
+          }}
 ```
 
+DEBUG note: In navSlice.js, within the function body of createSlice(), the property reducers, need to be declared as plural i.e. it will reducers and not reducer.
+
+### Step 12: Build the MapScreen component.
+
+1. We will now plot the input from users in the HomeScreen and when they click the get a ride option on the HomeScreen we will open the MapScreen and show a Google Map.
+
+2. Open the MapScreen.js file. At this point it will only have the boilerplate code.
+
+3. We will design this screen by splitting the screen area in 2 View components. The first View will contain the Map, and the 2nd view will contain rest of the details as needed.
+
+CODE:
+
+```javascript
+//import the following for styling
+import tw from "tailwind-react-native-classnames";
 ```
+
+4. Remove the boilerplate code from within the body of the MapScreen functional component and Add the following code:
+
+CODE:
+
+```javascript
+const MapScreen = () => {
+  return (
+    <View>
+      <Text>MapScreen boiler text</Text>
+
+      <View style={tw`h-1/2`}></View>
+      <View style={tw`h-1/2`}></View>
+    </View>
+  );
+};
+```
+
+5. Now in the folder ./components create a new file and call it Map.js and create it with the boiler code snippet of rnfes.
+
+CODE:
+
+```javascript
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+
+const Map = () => {
+  return (
+    <View>
+      <Text>Map default screen</Text>
+    </View>
+  );
+};
+
+export default Map;
+
+const styles = StyleSheet.create({});
+```
+
+6. Now, go back to MapScreen.js and import the Map.js component within the first View component. Do not forget to import Map component before calling it in MapScreen.js
+
+CODE:
+
+```javascript
+//import Map component
+import Map from "../components/Map";
+
+// call the component
+<View style={tw`h-1/2`}>
+  <Map />
+</View>;
+```
+
+7. Now we use the following link as a reference to setup the map: https://github.com/react-native-maps/react-native-maps
+
+8. Starting point to note in the above reference is that we will use the component called MapView to set things up. First lets install this package (stop server if needed).
+
+```
+yarn add react-native-maps
+```
+
+9. next import the package into your code for Map.js component. We will eventually also need an import that will show the pinned location on the map. Lets import that as well.
+
+```javascript
+//import MapView into Map.js
+import MapView, { Marker } from "react-native-maps";
+```
+
+10. Render the MapView component on the MapScreen i.e. call MapView. For testing purposes lets copy and try out the MapView component code given in the reference link to see if it is working. Remember one more important thing. Just like Image component, if you do not give styling to the MapView component, you will not see it getting rendered on the screen.
+
+CODE:
+
+```javascript
+// import tw obj for tailwind usage
+const Map = () => {
+  return (
+    <MapView
+      style={tw`flex-1`}
+      initialRegion={{
+        latitude: 37.78825,
+        longitude: -122.4324,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      }}
+    />
+  );
+};
+```
+
+now test if a default map shows up or not. stop and Restart your server if needed.
+
+#### V.IMP BUG NOTE:
+
+- I realized just with the above code, your maps will not render on the screen, even after you add styling. To address this you need follow the following steps.
+
+- Go back to your Google Cloud Platform. https://cloud.google.com/console/google/maps-apis/overview
+
+- Make sure you are in the right project folder.
+
+- Go to APIs and services from the menu.
+
+- Search for the following two APIs: "Maps SDK for Android" and "Maps SDK for iOS".
+
+- Activate these APIs
+
+- Now from menu again, go to "Credentials". Delete your previous API Key. Generate a new API key. Replace your old key with this new key in the .env file of your project.
+
+- Rebuild your project (stop and restart your expo server), and it should work now.
+
+11. Now we need to edit the MapView in such a way that when user enters origin and clicks get a ride menu option, it will go to the next screen, render the map and show the location of the origin on the map.
+
+12. Note that at this point, the state of origin is being updated using the user input using the setOrigin method on the HomeScreen. So now, we need to PULL this data and recall we have defined selectors for each state to do this.
+
+13. In Map.js component (right before the return statement), import and declare the required selector for the state - origin. We will do this by using a Hook called useSelector imported from react-redux package.
+
+CODE:
+
+```javascript
+//import the following
+import { useSelector } from "react-redux";
+import { selectOrigin } from "../slices/navSlice";
+
+// add the code
+const Map = () => {
+  const origin = useSelector(selectOrigin);
+  return (
+    <MapView
+      style={tw`flex-1`}
+      mapType="mutedStandard"
+      initialRegion={{
+        latitude: 37.78825,
+        longitude: -122.4324,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      }}
+    />
+  );
+};
+```
+
+14. Now we need to tie up the latitude and longitude property of the MapView component's initialRegion key with the user input value that has now been imported into the object origin inside of Map.js
+
+```javascript
+<MapView
+  style={tw`flex-1`}
+  mapType="mutedStandard"
+  initialRegion={{
+    latitude: origin.location.lat,
+    longitude: origin.location.lng,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  }}
+/>
+```
+
+15. and put a marker on the map to kind of highlight that location. To do this we need to change MapView component into a parent component and put the marker code inside of it as a child component.
+
+CODE:
+
+```javascript
+<MapView
+  style={tw`flex-1`}
+  mapType="mutedStandard"
+  initialRegion={{
+    latitude: origin.location.lat,
+    longitude: origin.location.lng,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  }}
+>
+  {origin?.location && (
+    <Marker
+      coordinate={{
+        latitude: origin.location.lat,
+        longitude: origin.location.lng,
+      }}
+      title="Origin"
+      description={origin.description}
+      identifier="origin"
+    />
+  )}
+</MapView>
+```
+
+Code explanation:
+the code origin?.location && (...) is to protect the app from trying to mark an undefined location in case the user does not enter any value for origin in the previous screen. we are using react conditional rendering to implement this logic. Go over the react native maps github library to self learn more usage.
+
+16. Adding further protection to the APp. If user does not enter an origin location, do not show them the navigation options of getting a ride or anything else.
+
+17. Go to NavOptions.js component file. Notice, that the navigation option are wrapped in the component called TouchableOpacity. We will add a prop to it such that this component is disabled if the state for origin is empty. So Lets grab the data in the state of origin using the hook useSelector in this file and declare it (just like we did in Map.js few steps back) and implement this logic
+
+CODE:
+
+```javascript
+// import the following
+import { useSelector } from "react-redux";
+import { selectOrigin } from "../slices/navSlice";
+
+// Declare the hook and selector before the return statement
+const origin = useSelector(selectOrigin);
+
+// add disabled prop to TouchableOpacity component like follows only add the changed code:
+<TouchableOpacity
+          onPress={() => navigation.navigate(item.screen)}
+          style={tw`pl-2 pb-8 pt-4 bg-gray-200 m-2 w-40`}
+          disabled={!origin}
+        >
+```
+
+18. You can add some styling to the View container for the navOptions to make the disabled option more obvious. After saving the code restart your app server if needed.
+
+CODE:
+
+```javascript
+<View style={tw`${!origin && "opacity-20"}`}>
+            <Image
+              style={{ width: 150, height: 150, resizeMode: "contain" }}
+              source={item.image}
+            />
+//rest of code as is after this
+```
+
+### Building the botton half of the MapScreen
+
+1. We will create a nested stack navigator in this area.
+
+2. import and create stack navigator and other component needed to implement
+
+```
+yarn add "@react-navigation/stack"
+```
+
+CODE:
+
+```javascript
+//import
+import { createStackNavigator } from "@react-navigation/stack";
+
+//declare right before component return statement
+const Stack = createStackNavigator();
+
+// add following code to 2nd half of View code
+<View style={tw`h-1/2`}>
+  <Stack.Navigator>
+    <Stack.Screen
+      name="NavigateCard"
+      component={NavigateCard}
+      options={{
+        headerShown: false,
+      }}
+    />
+  </Stack.Navigator>
+</View>;
+```
+
+3. In ./components add this new component with boiler plate code. we will use in the future called NavigateCard.js, and import this to MapScreen.js
+
+4. Add another nested screen to the recently create stack. this will be to choose uber ride type/size.
+
+```javascript
+<Stack.Screen
+  name="RideOptionsCard"
+  component={RideOptionsCard}
+  options={{
+    headerShown: false,
+  }}
+/>
+```
+
+5. Create this new component in ./components just like you did for the previous one and import it to MapScreen.js.
