@@ -9,7 +9,14 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 
 import { GOOGLE_MAPS_API_KEY } from "@env";
 
+import { useDispatch } from "react-redux";
+
+import { setOrigin, setDestination } from "../slices/navSlice";
+
 const HomeScreen = () => {
+  // declare the dispacther to push data into the data store
+  const dispatch = useDispatch();
+
   return (
     <SafeAreaView style={tw`bg-white h-full pt-10`}>
       <View style={tw`p-1`}>
@@ -19,7 +26,7 @@ const HomeScreen = () => {
         />
 
         <GooglePlacesAutocomplete
-          placeholder="Start Location"
+          placeholder="Enter Start Location"
           styles={{
             container: {
               flex: 0,
@@ -40,8 +47,16 @@ const HomeScreen = () => {
             language: "en",
           }}
           onPress={(data, details = null) => {
-            console.log(data);
-            console.log(details);
+            // console.log(data);
+            // console.log(details);
+            dispatch(
+              setOrigin({
+                location: details.geometry.location,
+                description: data.description,
+              })
+            );
+
+            dispatch(setDestination(null));
           }}
           fetchDetails={true}
           returnKeyType={"search"}

@@ -1,19 +1,22 @@
-import { StatusBar } from "expo-status-bar";
+// react native core imports
 import { StyleSheet, Text, View } from "react-native";
 
-//for redux
+//for redux provider
 import { Provider } from "react-redux";
+
 // for react native elements and icon packs
 import { SafeAreaProvider } from "react-native-safe-area-context";
-// for react navigation based gesture handler
-// import "react-native-gesture-handler";
-//navigation container
+
+//react navigation container and stack
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+// all screen imports
 import HomeScreen from "./screens/HomeScreen";
 import MapScreen from "./screens/MapScreen";
 import EatsScreen from "./screens/EatsScreen";
+
+//data store for redux
 import store from "./store";
 
 export default function App() {
