@@ -1712,4 +1712,146 @@ const styles = StyleSheet.create({});
 
 ### Add dynamic pricing calculations using Distance Matrix API
 
-1.
+1. Go in file Map.js in ./components. the computations need to be done inside a Map component, hence this file.
+
+2. Import and declare another useEffect() hook (right below the existing useEffect hook) as shown below.
+
+3. logic of hook: the execution of the body of the hook will be dependent on three values, origin destination and google maps api key. The body of the hook will take the values of origin and destination and send it to the distance matrix api to calculate the distance and receive the output back in an ASYNCHRONOUS way. We will then PUSH this calculated value to our redux store through a dispatch. Then later on in RideOptionsCard.js we will select this value from the redux store to dynamically display the distance between origin and destination and calculate price.
+
+4. So the skeleton structure of this hook will look as follows:
+
+CODE:
+
+```javascript
+useEffect(() => {
+  // if either value missing exit this body
+  if (!origin || !destination) return;
+
+  const getTravelTime = async () => {};
+
+  getTravelTime();
+}, [origin, destination, GOOGLE_MAPS_API_KEY]);
+```
+
+5. Now inside the body of getTravelTime async function, we need to make a GET request or a fetch() to the google distance matrix api and the result returns an array of objects which will contain the miles between origin and destination and travel time. We will PUSH this data into our state for travelTimeInformation.
+
+CODE:
+
+```javascript
+// only add the new part
+useEffect(() => {
+  // if either value missing exit this body
+  if (!origin || !destination) return;
+
+  const getTravelTime = async () => {
+    const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
+    fetch(URL)
+      .then((res) => res.json())
+      .then((data) => {
+        dispatch(setTravelTimeInformation(data.rows[0].elements[0]));
+      });
+  };
+
+  getTravelTime();
+}, [origin, destination, GOOGLE_MAPS_API_KEY]);
+```
+
+6. Now we need to PULL this state information in the RideOptionsCard.js component. So first declare the hook to use the selector that will PULL the state information.
+
+CODE:
+
+```javascript
+//import
+import { useSelector } from "react-redux";
+import { selectTravelTimeInformation } from "../slices/navSlice";
+
+//declare hook before return stmnt
+const travelTimeInformation = useSelector(selectTravelTimeInformation);
+```
+
+7. Now update the code in the Text component where it says select a ride
+
+CODE:
+
+```javascript
+</TouchableOpacity>
+        <Text style={tw`text-center py-5 text-xl`}>Select a Ride</Text>
+```
+
+With the following code:
+
+UPDATED CODE:
+
+```javascript
+// only adding the new code
+<Text style={tw`text-center py-5 text-xl`}>
+  Select a Ride - {travelTimeInformation?.distance.text}
+</Text>
+```
+
+Test it out. Now you should see the computed distance between origin and dest. dynamically.
+
+8. Do further modifications to the travel time Text component.
+
+CODE:
+
+```javascript
+//NEED TO MODIFY THIS
+<Text>Travel Time.....</Text>
+```
+
+with the following code:
+
+```javascript
+<Text>{travelTimeInformation?.duration.text}</Text>
+```
+
+This should update the UI to display dynamic travel times.
+
+9. Now we would want to dynamically compute the price based on the travel time information and type of ride selected. Before doing this, note that in the hardcoded data array in RideOptionsCard.js file, we have a key called multiplier. We will use this to determine price when a particular ride type is selected.
+
+10. we declare a constant variable to store the peak hour price multiplier. Add the following right after your data array.
+
+```javascript
+const PEAK_HOUR_RATE = 1.5;
+```
+
+Using this, modify the following code:
+
+```javascript
+//modify this
+<Text style={tw`text-xl`}>$10.00 </Text>
+```
+
+with the following code:
+
+First add the following package
+
+```
+yarn add intl
+```
+
+We are going to properly format the output depending on the country language and currency.
+
+Add the following imports:
+
+```javascript
+import Intl from "intl";
+import "intl/locale-data/jsonp/en-US";
+```
+
+Now Add the following CODE in the location where we wanted to modify
+
+```javascript
+<Text style={tw`text-xl`}>
+  {new Intl.NumberFormat("en-us", {
+    style: "currency",
+    currency: "USD",
+  }).format(
+    (travelTimeInformation?.duration.value * PEAK_HOUR_RATE * item.multiplier) /
+      100
+  )}
+</Text>
+```
+
+The formula for price calculation is a basic formula used and does not reflect the actual Uber calculations. As a self exercise you can actually check the time of the day and change the peak hour rate accordingly to calculate price. try it out.
