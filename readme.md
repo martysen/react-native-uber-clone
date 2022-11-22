@@ -1410,4 +1410,306 @@ useEffect(() => {
 }, [origin, destination]);
 ```
 
-Test it out now. You can swipe back and change the destination and it should redraw.
+Test it out now for some different destinations. You can swipe back and change the destination and it should redraw. It is not completely smooth but it does the job (care on your google api query quota). At times the redraw is not working properly for me, you can take this up as a self challenge to look into the documentation of fitToSuppliedMarkers and try to debug it.
+
+### Adding some UI components to uplift the presentation of the App
+
+1. In ./components create a file called NavFavorites.js and populate it with boiler plate code.
+
+CODE:
+
+```javascript
+//boiler plate code
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+
+const NavFavorites = () => {
+  return (
+    <View>
+      <Text>NavFavorites</Text>
+    </View>
+  );
+};
+
+export default NavFavorites;
+
+const styles = StyleSheet.create({});
+```
+
+2. In HomeScreen.js import the component NavFavorites.js and call this component right after the NavOptions component.
+
+CODE:
+
+```javascript
+//import
+import NavFavorites from "../components/NavFavorites";
+
+// call the component right after <NavOptions />
+<NavFavorites />;
+```
+
+3.  The purpose of NavFavorites component is to show things like your home address or work address or frequently visited places etc. Replace the boiler code in NavFavorites with the following. Replace code for the whole file.
+
+CODE:
+
+```javascript
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React from "react";
+
+import { Icon } from "react-native-elements";
+import tw from "tailwind-react-native-classnames";
+
+// hardcoded component data
+const data = [
+  {
+    id: "123",
+    icon: "home",
+    location: "Home",
+    destination: "200 Lake Village Blvd., Auburn Hills, MI, USA",
+  },
+  {
+    id: "456",
+    icon: "briefcase",
+    location: "Work",
+    destination: "Engineering Center, Oakland University, Rochester, MI, USA",
+  },
+];
+
+const NavFavorites = () => {
+  return (
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <TouchableOpacity style={tw`flex-row items-center p-5`}>
+          <Icon
+            style={tw`mr-4 rounded-full bg-gray-300 p-3`}
+            name={item.icon}
+            type="ionicon"
+            color="white"
+            size={18}
+          />
+          <View>
+            <Text style={tw`font-semibold text-lg`}>{item.location}</Text>
+            <Text style={tw`text-gray-500`}>{item.destination}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+    />
+  );
+};
+
+export default NavFavorites;
+
+const styles = StyleSheet.create({});
+```
+
+4. Now you can re-use this NavFavorites component in the screen where the user will give destination input, i.e. in the file NavigateCard.js
+
+CODE:
+
+```javascript
+</View>
+        <NavFavorites />
+      </View>
+    </SafeAreaView>
+```
+
+As a self challenge you can try to implement the functionality that when users click on these home or work icons, it will fill the state of origin or destination.
+
+5. App presentation issue: Notice how in the screen to enter destination, if user clicks on the destination input component, the keyboard comes up and it hides some of the content on the screen. To address this, we need to replace the basic View component with the KeyboardAvoidingView component.
+
+6. In App.js import KeyboardAvoidingView component first from the react-native library. Now call this component right after the call to the SafeAreaProvider component and wrap the remainder of the app inside the KeyboardAvoidingView component. i.e. your updated App.js component code will look like shown below. This component behaves differently for iOS and Android so take care.
+
+CODE:
+
+```javascript
+// import Platform and KeyboardAvoidingView from react-native
+
+//code
+return (
+  <Provider store={store}>
+    <NavigationContainer>
+      <SafeAreaProvider>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? -64 : 0}
+          style={{ flex: 1 }}
+        >
+          <Stack.Navigator>
+            <Stack.Screen
+              name="HomeScreen"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="MapScreen"
+              component={MapScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EatsScreen"
+              component={EatsScreen}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </KeyboardAvoidingView>
+      </SafeAreaProvider>
+    </NavigationContainer>
+  </Provider>
+);
+```
+
+Code explanation: for KeyboardAvoidingView we add two props. The simpler prop is style prop that we are familiar with. The new prop is a behavior prop. However, the behavior is different for iOS vs. Android. In iOS it uses padding and for android we need to use height to make the space for the keyboard and shift the rest of the app upwards to make space for the keyboard. We use the Platform component to determine the platform and write this logic using a ternary conditional operator. The final prop is keyboardVerticalOffset which gives some space between the keyboard top and the App. The is handled by default on Android but you need to give a value for iOS.
+
+7. Go back to NavigateCard.js. Right after the call to NavFavorites a View component closes. Add the following code right after that.
+
+CODE:
+
+```javascript
+<View
+  style={tw`flex-row bg-white justify-evenly py-2 mt-auto border-t border-gray-100`}
+>
+  <TouchableOpacity
+    style={tw`flex flex-row justify-between bg-black w-24 px-4 py-3 rounded-full`}
+  >
+    <Icon name="car" type="font-awesome" color="white" size={16} />
+    <Text style={tw`text-white text-center`}>Rides</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={tw`flex flex-row justify-between w-24 px-4 py-3 rounded-full`}
+  >
+    <Icon name="fast-food-outline" type="ionicon" color="black" size={16} />
+    <Text style={tw`text-center`}>Eats</Text>
+  </TouchableOpacity>
+</View>
+```
+
+8. When we click on the Rides Icon added above we want to transition to the next screen which we have created in the ./component called RideOptionsCard.js. So first we need to add the event Listener of onPress() to this TouchableOpacity component that wraps this Icon component.
+
+CODE:
+
+```javascript
+// ONLY ADD THE EVENT LISTENER
+<TouchableOpacity
+  onPress={() => navigation.navigate("RideOptionsCard")}
+  style={tw`flex flex-row justify-between bg-black w-24 px-4 py-3 rounded-full`}
+>
+  <Icon name="car" type="font-awesome" color="white" size={16} />
+  <Text style={tw`text-white text-center`}>Rides</Text>
+</TouchableOpacity>
+```
+
+### Ride Options Screen
+
+1. We will use the RideOptionsCard.js component to implement the following functionalities: calculate totalTravelTime, mileage, choose ride option like normal car large car or luxury car, and pricing options with pricing for peak hours.
+
+2. Remove all the boiler plate code with the following code.
+
+CODE:
+
+```javascript
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
+import React, { useState } from "react";
+import tw from "tailwind-react-native-classnames";
+import { Icon } from "react-native-elements";
+import { useNavigation } from "@react-navigation/native";
+
+const data = [
+  {
+    id: "Uber-X-123",
+    title: "UberX",
+    multiplier: 1,
+    image: require("../assets/UberX.webp"),
+  },
+  {
+    id: "Uber-XL-456",
+    title: "Uber XL",
+    multiplier: 1.2,
+    image: require("../assets/UberXL.webp"),
+  },
+  {
+    id: "Uber-LUX-789",
+    title: "Uber LUX",
+    multiplier: 1.75,
+    image: require("../assets/UberLux.webp"),
+  },
+];
+
+const RideOptionsCard = () => {
+  const navigation = useNavigation();
+  // create a local state to highlight which ride option was selected
+  const [selectedRide, setSelectedRide] = useState(null);
+
+  return (
+    <SafeAreaView style={tw`bg-white flex-grow`}>
+      <View>
+        <TouchableOpacity
+          style={tw`absolute top-3 left-5 z-50 p-3 rounded-full`}
+          onPress={() => navigation.navigate("NavigateCard")}
+        >
+          <Icon name="chevron-left" type="font-awesome" />
+        </TouchableOpacity>
+        <Text style={tw`text-center py-5 text-xl`}>Select a Ride</Text>
+      </View>
+
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => setSelectedRide(item)}
+            style={tw`flex-row justify-between items-center px-10 ${
+              item.id === selectedRide?.id && "bg-gray-200"
+            }`}
+          >
+            <Image
+              style={{ width: 100, height: 100, resizeMode: "contain" }}
+              source={item.image}
+            />
+            <View style={tw`-ml-6`}>
+              <Text style={tw`text-xl font-semibold`}>{item.title}</Text>
+              <Text>Travel Time.....</Text>
+            </View>
+            <Text style={tw`text-xl`}>$10.00 </Text>
+          </TouchableOpacity>
+        )}
+      />
+
+      <View>
+        <TouchableOpacity
+          disabled={!selectedRide}
+          style={tw`bg-black py-3 m-3 ${!selectedRide && "bg-gray-300"}`}
+        >
+          <Text style={tw`text-center text-white text-xl`}>
+            Choose {selectedRide?.title}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default RideOptionsCard;
+
+const styles = StyleSheet.create({});
+```
+
+### Add dynamic pricing calculations using Distance Matrix API
+
+1.
