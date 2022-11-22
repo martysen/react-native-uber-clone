@@ -1220,3 +1220,194 @@ const Stack = createStackNavigator();
 ```
 
 5. Create this new component in ./components just like you did for the previous one and import it to MapScreen.js.
+
+6. The design logic is, when the MapScreen loads, the lower bottom of the screen will show the NavigateCard component which will have a navigation option to RideOptionsCard component.
+
+BUG Note: If you get an error stating something along the lines of gesture-handler
+execute the terminal command
+
+```
+yarn add react-native-gesture-handler
+```
+
+7. Add some styling to the NavigateCard component as shown below with some core components and google places api to input destination.
+
+8. To do list:
+
+- Give a welcome text,
+- implment google places api to enter destination.
+- Update state of destination in data store using the hook for useDispatch()
+- allow navigation to the next component i.e. the RideOptionsCard.js
+
+CODE:
+
+```javascript
+//import the following
+import tw from "tailwind-react-native-classnames";
+
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { GOOGLE_MAPS_API_KEY } from "@env";
+import { setDestination } from "../slices/navSlice";
+import { useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+
+// add code right before return stmnt
+const dispatch = useDispatch();
+const navigation = useNavigation();
+
+// remove boiler code in return stmnt and add
+<SafeAreaView style={tw`bg-white flex-1`}>
+  <Text style={tw`text-center py-5 text-xl`}>Good Morning, John Doe</Text>
+  <View style={tw`border-t border-gray-200 flex-shrink`}>
+    <View>
+      <GooglePlacesAutocomplete
+        placeholder="Enter your destination"
+        styles={inputBoxStyles}
+        debounce={400}
+        nearbyPlacesAPI="GooglePlacesSearch"
+        enablePoweredByContainer={false}
+        minLength={2}
+        query={{
+          key: GOOGLE_MAPS_API_KEY,
+          language: "en",
+        }}
+        fetchDetails={true}
+        returnKeyType={"search"}
+        onPress={(data, details = null) => {
+          // console.log(data);
+          // console.log(details);
+          dispatch(
+            setDestination({
+              location: details.geometry.location,
+              description: data.description,
+            })
+          );
+          navigation.navigate("RideOptionsCard");
+        }}
+      />
+    </View>
+  </View>
+</SafeAreaView>;
+
+// Add code for StyleSheet at the end
+const inputBoxStyles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    paddingTop: 20,
+    flex: 0,
+  },
+  textInput: {
+    backgroundColor: "#DDDDDF",
+    borderRadius: 0,
+    fontSize: 18,
+  },
+  textInputContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 0,
+  },
+});
+```
+
+You should have a nested react navigation implmented at this point.
+
+### Update Map API with destination input mapping: DIRECTIONS API usage
+
+1. Open component Map.js. Stop the server. Add the following package. Reference documentation for the package: https://github.com/bramus/react-native-maps-directions
+
+```
+yarn add react-native-maps-directions
+```
+
+2. import the value of the destination state into Map.js. Add the following code right below the useSelector() hook for the origin state.
+
+```javascript
+//import selectDestination from navSlice
+const destination = useSelector(selectDestination);
+```
+
+3. Implement react conditional rendering with the following logic. If user has provided both the origin and destination, use the Directions API else if only origin use the basic Maps API which was already there. Insert the following code right before {origin?.location && ...
+
+CODE:
+
+```javascript
+// import
+import MapViewDirections from "react-native-maps-directions";
+import { GOOGLE_MAPS_API_KEY } from "@env";
+
+// add code before {origin?.location && ...
+{
+  origin && destination && (
+    <MapViewDirections
+      origin={origin.description}
+      destination={destination.description}
+      apikey={GOOGLE_MAPS_API_KEY}
+      strokeWidth={3}
+      strokeColor="black"
+    />
+  );
+}
+```
+
+4. Zoom out the map such that it shows both the source and destination on the View area of the screen. To accomplish this, we need a "reference" to the MapView component such that it can be edited. We get this reference using a hook called useRef(). It is bassically creating a pointer.
+
+CODE:
+
+```javascript
+//import
+import { useRef } from "react";
+
+//declare the hook where you have the other hooks
+const mapRef = useRef(null);
+```
+
+5. In the MapView Component, add the following prop.
+
+CODE:
+
+```javascript
+
+
+<MapView
+      ref={mapRef}
+// rest of the code as is
+```
+
+6. Now to redraw the MapView, we need a Marker component for the destination. Note how in Map.js you have a Marker component for origin. Replicate that code and replace origin with destination.
+
+CODE:
+
+```javascript
+// add the following right after Marker for origin
+{
+  destination?.location && (
+    <Marker
+      coordinate={{
+        latitude: destination.location.lat,
+        longitude: destination.location.lng,
+      }}
+      title="Destination"
+      description={destination.description}
+      identifier="destination"
+    />
+  );
+}
+```
+
+7. Now we need to add a useEffect() hook. This is because Maps is external to react native and its behavior can be controlled only using this hook. The hook will monitor the values of origin and destination and if either one or both changes, it will execute a code to redraw the map as specified in the useEffect() body. Declare the hook right after all the other hooks.
+
+CODE:
+
+```javascript
+// code for useEffect()
+useEffect(() => {
+  // if either value missing exit this body
+  if (!origin || !destination) return;
+
+  // else zoom out from Map to show both
+  mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
+    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+  });
+}, [origin, destination]);
+```
+
+Test it out now. You can swipe back and change the destination and it should redraw.
