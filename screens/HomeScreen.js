@@ -12,6 +12,7 @@ import { GOOGLE_MAPS_API_KEY } from "@env";
 import { useDispatch } from "react-redux";
 
 import { setOrigin, setDestination } from "../slices/navSlice";
+import NavFavorites from "../components/NavFavorites";
 
 const HomeScreen = () => {
   // declare the dispacther to push data into the data store
@@ -62,6 +63,7 @@ const HomeScreen = () => {
           returnKeyType={"search"}
         />
         <NavOptions />
+        <NavFavorites />
       </View>
     </SafeAreaView>
   );
