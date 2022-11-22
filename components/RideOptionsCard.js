@@ -11,6 +11,11 @@ import React, { useState } from "react";
 import tw from "tailwind-react-native-classnames";
 import { Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { selectTravelTimeInformation } from "../slices/navSlice";
+
+import Intl from "intl";
+import "intl/locale-data/jsonp/en-US";
 
 const data = [
   {
@@ -33,10 +38,14 @@ const data = [
   },
 ];
 
+//multiplier to determine price during peak hours
+const PEAK_HOUR_RATE = 1.5;
+
 const RideOptionsCard = () => {
   const navigation = useNavigation();
   // create a local state to highlight which ride option was selected
   const [selectedRide, setSelectedRide] = useState(null);
+  const travelTimeInformation = useSelector(selectTravelTimeInformation);
 
   return (
     <SafeAreaView style={tw`bg-white flex-grow`}>
@@ -47,7 +56,9 @@ const RideOptionsCard = () => {
         >
           <Icon name="chevron-left" type="font-awesome" />
         </TouchableOpacity>
-        <Text style={tw`text-center py-5 text-xl`}>Select a Ride</Text>
+        <Text style={tw`text-center py-5 text-xl`}>
+          Select a Ride - {travelTimeInformation?.distance.text}
+        </Text>
       </View>
 
       <FlatList
@@ -66,9 +77,19 @@ const RideOptionsCard = () => {
             />
             <View style={tw`-ml-6`}>
               <Text style={tw`text-xl font-semibold`}>{item.title}</Text>
-              <Text>Travel Time.....</Text>
+              <Text>{travelTimeInformation?.duration.text} Travel</Text>
             </View>
-            <Text style={tw`text-xl`}>$10.00 </Text>
+            <Text style={tw`text-xl`}>
+              {new Intl.NumberFormat("en-us", {
+                style: "currency",
+                currency: "USD",
+              }).format(
+                (travelTimeInformation?.duration.value *
+                  PEAK_HOUR_RATE *
+                  item.multiplier) /
+                  100
+              )}
+            </Text>
           </TouchableOpacity>
         )}
       />
