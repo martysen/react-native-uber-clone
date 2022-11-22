@@ -57,7 +57,7 @@ const RideOptionsCard = () => {
           <Icon name="chevron-left" type="font-awesome" />
         </TouchableOpacity>
         <Text style={tw`text-center py-5 text-xl`}>
-          Select a Ride - {travelTimeInformation?.distance.text}
+          Select a Ride - {travelTimeInformation?.distance?.text}
         </Text>
       </View>
 
@@ -77,7 +77,7 @@ const RideOptionsCard = () => {
             />
             <View style={tw`-ml-6`}>
               <Text style={tw`text-xl font-semibold`}>{item.title}</Text>
-              <Text>{travelTimeInformation?.duration.text} Travel</Text>
+              <Text>{travelTimeInformation?.duration?.text} Travel</Text>
             </View>
             <Text style={tw`text-xl`}>
               {new Intl.NumberFormat("en-us", {
